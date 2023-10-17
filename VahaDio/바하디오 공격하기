@@ -1,0 +1,8 @@
+script.Parent.Triggered:Connect(function()
+	if math.random(1,2) == 1 then
+		script.Parent.KeyboardKeyCode = Enum.KeyCode.E
+	else
+		script.Parent.KeyboardKeyCode = Enum.KeyCode.F
+	end
+	script.Parent.Parent.Parent.Zombie.Health -= script.Parent.Value.Value
+end)
