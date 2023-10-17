@@ -1,0 +1,27 @@
+function findTorso(pos)
+	local torso = nil
+	local dist = 100000
+	local child = workspace:children()
+	for i=1, #child do
+		if child[i].className == "Model" then
+			local h = child[i]:findFirstChild("Humanoid")
+			if h ~= nil then
+				local check = child[i]:findFirstChild("Head")
+				if check ~= nil then
+					if (check.Position - pos).magnitude < dist then
+						torso = check
+						dist = (check.Position - pos).magnitude
+					end
+				end
+			end
+		end
+	end
+	return torso
+end
+
+game:GetService("RunService").Stepped:Connect(function()
+	local torso = findTorso(script.Parent.Position)
+	if torso ~= nil then
+		script.Parent.CFrame = CFrame.new(script.Parent.Position, torso.Position)
+	end
+end)
