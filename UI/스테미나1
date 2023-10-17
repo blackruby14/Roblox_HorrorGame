@@ -1,0 +1,78 @@
+local cas = game:GetService("ContextActionService")
+local RS = game:GetService("RunService")
+
+local m_cam = require(script:WaitForChild("Camera"))
+local r_maxStam = script.R_GetMaxStamina
+
+local players = game:GetService("Players")
+local player = players.LocalPlayer
+local character = script.Parent
+local humanoid = character:WaitForChild("Humanoid")
+
+local db = false
+
+local maxStamina = r_maxStam:InvokeServer()
+character:SetAttribute("MaxStamina", maxStamina)
+character:SetAttribute("Stamina", maxStamina)
+
+---------------
+local SprintKey = Enum.KeyCode.LeftShift
+local speedPercent = 80
+local plusStamina = 1.1
+local minusStamina = 1
+---------------
+
+local originWalkSpeed
+
+local function SprintHandle(actionName, inputState, inputObj)
+		if inputState == Enum.UserInputState.Begin then
+			db = true
+			while wait() do
+				if db == true and game.Players.LocalPlayer.Character then
+					repeat wait() until game.Players.LocalPlayer.Character.Humanoid --wait for humanoid
+					originWalkSpeed = 10
+					game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 17
+
+					m_cam:TsMaxPlay()
+					break
+				else
+					break
+				end
+			end
+
+			while db == true do 
+			local stamina = character:GetAttribute("Stamina")
+			if stamina > 0 then 
+				if script.Parent.Humanoid.MoveDirection.Magnitude > 0 then
+					character:SetAttribute("Stamina", stamina - minusStamina)
+				end
+			else
+					db = false
+					break
+				end
+				wait()
+			end
+		if db == false and character:GetAttribute("Stamina") < maxStamina then
+			if script.Parent.Humanoid.MoveDirection.Magnitude >= 0 then
+				game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 10
+				m_cam:TsMinPlay()
+			end
+		end
+		elseif inputState == Enum.UserInputState.End then
+			db = false
+			if game.Players.LocalPlayer.Character then
+				repeat wait() until game.Players.LocalPlayer.Character.Humanoid
+				game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 10
+				wait(1)
+				m_cam:TsMinPlay()
+				while db == false and character:GetAttribute("Stamina") < maxStamina do
+					wait()
+					character:SetAttribute("Stamina", character:GetAttribute("Stamina") + plusStamina)
+			end
+		end
+	end
+end
+
+cas:BindAction("Sprint", SprintHandle, true, Enum.KeyCode.LeftShift)
+cas:SetTitle("Sprint", "달리기")
+cas:SetPosition("Sprint", UDim2.new(1, -70, 0, 10))
