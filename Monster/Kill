@@ -1,1 +1,59 @@
+local L = script.Parent.LightOpint.SpotLight
+function Light()
+	for i=1, 50 do
+		L.Enabled = true
+		wait(0.025)
+		L.Enabled =false
+		wait(0.025)
+	end
+end
 
+
+local teddy = script.Parent
+local humanoid = teddy.Zombie
+
+local function getHumPos()
+	return (teddy.HumanoidRootPart.Position)
+end
+
+local function attack(target, teddyPart)
+	local RS = game.ReplicatedStorage.Ai_1RS -- 괴물을 변경하고싶다면 이 부분 수정
+	local distance = (teddyPart.Position - getHumPos()).Magnitude
+	if distance < 7 and game.Players:GetPlayerFromCharacter(target) and not game.Players:GetPlayerFromCharacter(target).Safe.Value then
+		target.Humanoid.Health = 0
+		script.Parent.Zombie.WalkSpeed = 0
+		local plr = game.Players:GetPlayerFromCharacter(target)
+		-- jumpscare
+		if plr.GettingChasedBy.Value == script.Parent then
+			plr.GettingChased.Value = false
+			plr.GettingChasedBy.Value = nil
+		end
+		RS.Jumpscare:FireClient(plr)
+		script.Parent.Jumpscaring.Value = true
+		Light()
+		wait(1)
+		script.Parent.Zombie.WalkSpeed = 14
+	end
+end
+
+local function detection(part, teddyPart)
+	if part.Parent:FindFirstChild("Humanoid") then
+		local character = part.Parent
+		if game.Players:GetPlayerFromCharacter(character) then
+			--Check the player is still alive (And it's not our own character)
+			if character.Humanoid.Health > 0 and character ~= teddy then
+				attack(character, teddyPart)
+			end
+		end
+	end
+end
+
+for i,v in pairs(script.Parent:GetDescendants()) do
+	if v:IsA("BasePart") or v:IsA("MeshPart") or v:IsA("UnionOperation") then
+		if not string.find(v.Name, "Leg") then
+			v.Touched:Connect(function(hit)
+				detection(hit, v)
+			end)
+		end
+	end
+end
