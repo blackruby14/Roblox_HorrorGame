@@ -1,0 +1,229 @@
+local LoopPointsFolder = workspace.LoopPoints
+local Humanoid = script.Parent.Zombie
+local HRP = script.Parent.HumanoidRootPart
+local Players = game:GetService("Players")
+local PathfindingService = game:GetService("PathfindingService")
+local Finding = true
+
+local RayCastParams = RaycastParams.new()
+RayCastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+local RayCastParamsForChasePlayer = RaycastParams.new()
+RayCastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+for i, part in pairs(script.Parent:GetDescendants()) do
+	if part:IsA("BasePart") then
+		part:SetNetworkOwner(nil)
+	end
+end
+
+local function ChasePlayer()
+	local filtertable = {}
+	table.insert(filtertable, script.Parent)
+	table.insert(filtertable, workspace.BlackListPart)
+	RayCastParamsForChasePlayer.FilterDescendantsInstances = filtertable
+	for i, plr in pairs(Players:GetPlayers()) do
+		if plr.Character then
+			table.insert(filtertable, plr.Character)
+		end
+	end
+
+	RayCastParams.FilterDescendantsInstances = filtertable
+	
+	for i, plr in pairs(Players:GetPlayers()) do
+		if plr.Character then
+			local result = workspace:Raycast(HRP.Position, plr.Character.HumanoidRootPart.Position - HRP.Position, RayCastParamsForChasePlayer)
+			if result and (plr.Character.HumanoidRootPart.Position - HRP.Position).Magnitude < 50 then
+				if Players:GetPlayerFromCharacter(result.Instance.Parent) then
+					print("플레이어를 찾아버렸다구?")
+					game.ReplicatedStorage.Ai_1RS.Targeted:FireClient(plr, true, game.ReplicatedStorage.Ai_1RS.chaseTheme, 0)
+					Humanoid:MoveTo(HRP.Position)
+					while true do
+						if not plr then
+							break
+						end
+						print("플레이어 추격중")
+						
+						local find = false
+						for i, v in pairs(workspace.SaveZone:GetChildren()) do
+							local result = workspace:GetPartsInPart(v)
+							for i, part in pairs(result) do
+								if part.Parent == plr.Character then
+									find = true
+								end
+							end
+						end
+						
+						if not plr.Character then
+							Finding = true
+							print("플레이어 없다. 어그로가 풀렸다")
+							Humanoid:MoveTo(HRP.Position)
+							game.ReplicatedStorage.Ai_1RS.Targeted:FireClient(plr, false, game.ReplicatedStorage.Ai_1RS.chaseTheme, 0)
+							break
+						else
+							if (plr.Character.HumanoidRootPart.Position - HRP.Position).Magnitude > 50 or plr.Character.Humanoid.Health == 0 or find == true then
+								Finding = true
+								print("잡다한 것들. 어그로가 풀렸다")
+								Humanoid:MoveTo(HRP.Position)
+								game.ReplicatedStorage.Ai_1RS.Targeted:FireClient(plr, false, game.ReplicatedStorage.Ai_1RS.chaseTheme, 0)
+								break
+							else
+								Humanoid:MoveTo(plr.Character.HumanoidRootPart.Position)
+							end
+						end
+						local aresult = workspace:Raycast(HRP.Position, plr.Character.HumanoidRootPart.Position - HRP.Position, RayCastParams)
+						if aresult then
+
+							--print("페스파인딩 시작")
+							local path = PathfindingService:CreatePath({
+								AgentRadious = 30
+							})
+							path:ComputeAsync(script.Parent.HumanoidRootPart.Position, plr.Character:GetPivot().Position)
+
+							local WayPoints = path:GetWaypoints()
+							for i, waypoint in pairs(WayPoints) do				
+								if i == 1 then
+									continue --첫번째 웨이포인트만 스킵, 첫번째 웨이포인트는 길찻기서비스 시작될 시점에는 이미 지나쳤을 가능성 높음. 또는 패스파인딩 시작할 때 자기 위치로 MoveTo함수 쓰는 것도 유효한 방법
+								end
+
+								if not plr then
+									break
+								end
+								local find = false
+								for i, v in pairs(workspace.SaveZone:GetChildren()) do
+									local result = workspace:GetPartsInPart(v)
+									for i, part in pairs(result) do
+										if part.Parent == plr.Character then
+											find = true
+										end
+									end
+								end
+								if not plr.Character then
+									Finding = true
+									print("플레이어 없다. 어그로가 풀렸다")
+									Humanoid:MoveTo(HRP.Position)
+									game.ReplicatedStorage.Ai_1RS.Targeted:FireClient(plr, false, game.ReplicatedStorage.Ai_1RS.chaseTheme, 0)
+									break
+								else
+									if (plr.Character.HumanoidRootPart.Position - HRP.Position).Magnitude > 50 or plr.Character.Humanoid.Health == 0 or find == true then
+										Finding = true
+										print("잡다한 것들. 어그로가 풀렸다")
+										Humanoid:MoveTo(HRP.Position)
+										game.ReplicatedStorage.Ai_1RS.Targeted:FireClient(plr, false, game.ReplicatedStorage.Ai_1RS.chaseTheme, 0)
+										break
+									end
+								end
+								local result = workspace:Raycast(HRP.Position, (plr.Character.HumanoidRootPart.Position - HRP.Position) * 2, RayCastParams)
+
+								if result == nil then
+									print("패스파인딩 끝")
+									break
+								end
+								--local Part = Instance.new("Part", workspace)
+								--Part.Anchored = true
+								--Part.Size = Vector3.new(0.4,0.4,0.4)
+								--Part.Position = waypoint.Position
+								--Part.CanCollide = false
+								--game:GetService("Debris"):AddItem(Part, 1)		
+						
+								print("웨이포인트로")
+								Humanoid:MoveTo(waypoint.Position)
+								if waypoint.Action == Enum.PathWaypointAction.Jump then
+									Humanoid.Jump = true
+								end
+
+								repeat
+									Humanoid:MoveTo(waypoint.Position)
+									game:GetService("RunService").Heartbeat:Wait() -- 하늘에 떠있을때 페스파인딩 시작해서 그런거구나!
+								until (HRP.Position - waypoint.Position).Magnitude < 5
+							end
+						else
+							Humanoid:MoveTo(plr.Character.HumanoidRootPart.Position)
+						end
+
+						task.wait()
+					end
+				end
+			end
+		end
+	end
+end
+
+task.spawn(function()
+	local Order = 1
+	local IsBiggering = true
+	while true do
+		task.wait()
+		if Finding == false then
+			repeat
+				task.wait()
+			until Finding == true
+		end
+		if IsBiggering then
+			Order += 1
+		else
+			Order -=1
+		end
+		if IsBiggering == true and Order == 6 then
+			IsBiggering = false
+		elseif IsBiggering == false and Order == 1 then
+			IsBiggering = true
+		end
+		print(Order)
+		local goal = LoopPointsFolder["Part"..Order]
+
+		while (goal.Position - HRP.Position).Magnitude > 8 do
+			local bresult = workspace:Raycast(HRP.Position, goal.Position - HRP.Position, RayCastParams)
+
+			if bresult then
+				local path = PathfindingService:CreatePath({
+					AgentRadius = 14;
+					AgentHeight = 6
+				})
+				path:ComputeAsync(HRP.Position, goal.Position)
+				local ways = path:GetWaypoints()
+				for i, v in pairs(ways) do
+					for i, plr in pairs(Players:GetPlayers()) do
+						if plr.Character then
+							local result = workspace:Raycast(HRP.Position, plr.Character.HumanoidRootPart.Position - HRP.Position, RayCastParamsForChasePlayer)
+							if result then
+								if Players:GetPlayerFromCharacter(result.Instance.Parent) or Players:GetPlayerFromCharacter(result.Instance.Parent.Parent) then
+									print("잡았다 요놈")
+
+									ChasePlayer()
+									break
+								end
+							end
+						end
+					end
+					
+					if not workspace:Raycast(HRP.Position, goal.Position - HRP.Position, RayCastParams) then
+						break
+					end
+					if v.Action == Enum.PathWaypointAction.Jump then
+						Humanoid.Jump = true
+					end
+					Humanoid:MoveTo(v.Position)
+					Humanoid.MoveToFinished:Wait()
+				end
+			end
+
+			for i, plr in pairs(Players:GetPlayers()) do
+				if plr.Character then
+					local result = workspace:Raycast(HRP.Position, plr.Character.HumanoidRootPart.Position - HRP.Position, RayCastParamsForChasePlayer)
+					if result then
+						if Players:GetPlayerFromCharacter(result.Instance.Parent) or Players:GetPlayerFromCharacter(result.Instance.Parent.Parent) then
+							print("잡았다 요놈")
+
+							ChasePlayer()
+							break
+						end
+					end
+				end
+			end
+			
+			Humanoid:MoveTo(goal.Position)
+			task.wait()
+		end
+	end
+end)
