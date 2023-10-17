@@ -1,0 +1,41 @@
+local animation = script:WaitForChild('Normal')
+local humanoid = script.Parent:WaitForChild('Zombie')
+local origSpeed = script.Parent.Zombie.WalkSpeed
+local chaseSpeed = script.Parent.ChaseWalkspeed.Value
+local dance = humanoid:LoadAnimation(animation)
+dance:Play()
+local dance2
+
+if script.Parent.ChangeAnim.Value then
+	local animation2 = script.Parent.ChangeAnim:WaitForChild("Chase")
+	dance2 = humanoid:LoadAnimation(animation2)
+end
+
+
+script.Parent.Chasing.Changed:Connect(function()
+	if script.Parent.ChangeAnim.Value then
+		if script.Parent.Chasing.Value == true then
+			script.Parent.Zombie.WalkSpeed = chaseSpeed
+			dance:Stop()
+			dance2:Play()
+		else
+			dance:Play()
+			dance2:Stop()
+		end
+	else
+		if script.Parent.Chasing.Value == true then
+			script.Parent.Zombie.WalkSpeed = chaseSpeed
+			dance:AdjustSpeed(1.5)
+		else
+					dance:AdjustSpeed(1)
+				end
+			end
+end)
+
+script.Parent.Jumpscaring.Changed:Connect(function()
+	if script.Parent.Jumpscaring.Value == true then
+		dance:Stop()
+		wait(3)
+		dance:Play()
+	end
+	end)
