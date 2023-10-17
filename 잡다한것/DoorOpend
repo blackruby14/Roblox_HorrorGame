@@ -1,5 +1,0 @@
-script.Parent.Touched:Connect(function(hit)
-	hit.Parent:FindFirstChild("Humanoid")
-	script.Parent.CanTouch = false
-	game.ReplicatedStorage.TextFolders.DoorOpened:FireAllClients(hit)
-end)
