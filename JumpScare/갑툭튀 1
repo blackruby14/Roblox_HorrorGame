@@ -1,0 +1,35 @@
+local TweenService = game:GetService("TweenService")
+local Camera = game.Workspace.CurrentCamera
+local F = game.Workspace.Cutscene.Jumpscare1
+
+local Screen1 = F.P1
+local Screen2 = F.P2
+
+local function MoveCamera(one, two, Time, EasingStyle, Easing)
+	Camera.CameraType = Enum.CameraType.Scriptable
+	Camera.CFrame = one.CFrame
+	local Cutscene = TweenService:Create(Camera, TweenInfo.new(0.3, EasingStyle, Easing), {CFrame = two.CFrame})
+	local Cutscene2 = TweenService:Create(Camera, TweenInfo.new(0, EasingStyle, Easing), {CFrame = two.CFrame})
+	local Animation = game.Workspace.Hotel:FindFirstChild("ScareJS").Zombie:LoadAnimation(game.Workspace.Hotel.ScareJS.Jumpscare)
+	Animation:Play()
+	Cutscene:Play()
+	wait(Time)
+	Cutscene2:Play()
+	wait(Time)
+end
+
+local function Cutscene()
+	MoveCamera(Screen1, Screen2, 2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+	Camera.CameraType = Enum.CameraType.Custom
+	game.Players.LocalPlayer.PlayerGui.HealthAndStamina.Enabled = true
+	Camera.CameraSubject = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
+
+end
+
+game.Workspace.Hotel.GhostIsCome.Touched:Connect(function(hit)
+	game.Players.LocalPlayer.PlayerGui.HealthAndStamina.Enabled = false
+	hit.Parent:FindFirstChild("Humanoid")
+	game.Workspace.Hotel.GhostIsCome.CanTouch = false
+	Cutscene()
+	game.Workspace.Hotel.JSJSBarrier:Destroy()
+end)
