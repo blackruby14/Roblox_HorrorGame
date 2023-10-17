@@ -1,0 +1,32 @@
+local Model = script.Parent.Parent.Parent
+local Switch = Model.Switch
+
+function On()
+	local Basic = script.Parent.Parent.Parent
+	Basic.Light1.Transparency = 0
+	Basic.Light1.SpotLight.Enabled = true
+	Basic.Light2.Transparency = 0
+	Basic.Light2.SpotLight.Enabled = true
+	Basic.Light3.Transparency = 0
+	Basic.Light3.SpotLight.Enabled = true
+	Basic.Light4.Transparency = 0
+	Basic.Light4.SpotLight.Enabled = true
+	Basic.Light5.Transparency = 0
+	Basic.Light5.SpotLight.Enabled = true
+	Basic.Light6.Transparency = 0
+	Basic.Light6.SpotLight.Enabled = true
+	Basic.Light7.Transparency = 0
+	Basic.Light7.SpotLight.Enabled = true
+	Basic.Light8.Transparency = 0
+	Basic.Light8.SpotLight.Enabled = true
+	Basic.Light9.Transparency = 0
+	Basic.Light9.SpotLight.Enabled = true
+	Basic.Light10.Transparency = 0
+	Basic.Light10.SpotLight.Enabled = true
+end
+script.Parent.Triggered:Connect(function()
+	Switch.On:Play()
+	On()
+	script.Parent:Destroy()
+	Switch.Orientation = Vector3.new(-11.25,0,0)
+end)
