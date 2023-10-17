@@ -1,0 +1,29 @@
+local function AnimateText(Text)
+	for i = 1, #Text, 1 do
+		script.Parent.Parent.TextLabel.Text = string.sub(Text, 1, i)
+		wait(0.04)
+	end
+end
+
+local TextPart = game.ReplicatedStorage.TextFolders.Text2
+
+TextPart.OnClientEvent:Connect(function(hit)
+	hit.Parent:FindFirstChild("Humanoid")
+	game.Workspace.TextParts.Text2.CanTouch = false
+	wait(1)
+	script.Parent.Parent.TextLabel.Visible = true
+	script.Parent.Parent.TextLabel.TextTransparency = 0
+	script.Parent.Parent.TextLabel.TextStrokeTransparency = 0
+	AnimateText("음..? 여기가 이 장소의 끝인가?") --이 부분을 바꾸면 나오는 텍스트가 바뀜
+	wait(2)
+	AnimateText("그럼 그 사람은 어디있는거지?") --이 부분을 바꾸면 나오는 텍스트가 바뀜
+	wait(2)
+	AnimateText("더 볼게 없으니 일단 그냥 돌아가자.") --이 부분을 바꾸면 나오는 텍스트가 바뀜
+	wait(2)
+	for i=1,10 do
+		script.Parent.Parent.TextLabel.TextTransparency = script.Parent.Parent.TextLabel.TextTransparency +0.1
+		script.Parent.Parent.TextLabel.TextStrokeTransparency = script.Parent.Parent.TextLabel.TextStrokeTransparency +0.1
+		wait(0.025)
+	end
+	script.Parent.Parent.TextLabel.Visible = false
+end)
