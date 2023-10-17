@@ -1,0 +1,22 @@
+local M = script.Parent.Parent.OOOW.HumanoidRootPart
+
+script.Parent.Touched:Connect(function(hit)
+	if hit.Parent:FindFirstChild("Humanoid") then
+		script.Parent.CanTouch = false
+		local Anim = M.Parent.Zombie:LoadAnimation(M.Parent.GrowUp)
+		Anim:Play()
+		script.Parent.Parent.CamshakeTrigger2.CanTouch = true
+		game.Workspace.SoundFolder.Jijin:Play()
+		game.Workspace.SoundFolder.MSCREAM:Play()
+		for i=1, 15 do
+			M.CFrame = M.CFrame+Vector3.new(0,1.5,0)
+			wait(0.025)
+		end
+		wait(4)
+		for i=1, 150 do
+			M.CFrame = M.CFrame-Vector3.new(0,0.15,0)
+			wait(0.025)
+		end
+
+	end
+end)
