@@ -1,0 +1,436 @@
+--local LoopPointsFolder = workspace.LoopPoints2
+local Boss = script.Parent
+local Humanoid = script.Parent.Zombie
+local HRP = script.Parent.HumanoidRootPart
+local Players = game:GetService("Players")
+local PathfindingService = game:GetService("PathfindingService")
+local Finding = true
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
+
+local Awakened = false
+
+local cooltime = 0
+local cooltime2 = 0
+local cooltime3 = 0
+
+local AnimationFolder = script.Parent.Animations
+local WalkAnim = Humanoid.Animator:LoadAnimation(AnimationFolder.Walk) WalkAnim:Play()
+local WalkSound = script.Parent.UpperTorso.Footstep
+
+local AttackAnim1 = Humanoid.Animator:LoadAnimation(AnimationFolder.LeftAttack)
+local AttackAnim2 = Humanoid.Animator:LoadAnimation(AnimationFolder.RightAttack)
+local SkillAnim1 = Humanoid.Animator:LoadAnimation(AnimationFolder.Strike)
+local SkillAnim2 = Humanoid.Animator:LoadAnimation(AnimationFolder.SpawnMob)
+local SkillAnim1 = Humanoid.Animator:LoadAnimation(AnimationFolder.Strike)
+local AwakenAnim = Humanoid.Animator:LoadAnimation(AnimationFolder.GoToPhaseTwo)
+local ChargeAnim = Humanoid.Animator:LoadAnimation(AnimationFolder.Rush)
+local DeadAnim = Humanoid.Animator:LoadAnimation(AnimationFolder.Dead)
+
+local SoundFol = script.Parent.Sounds
+
+local RayCastParams = RaycastParams.new()
+RayCastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+local RayCastParamsForChasePlayer = RaycastParams.new()
+RayCastParams.FilterType = Enum.RaycastFilterType.Blacklist
+
+--for i, part in pairs(script.Parent:GetDescendants()) do
+--	if part:IsA("BasePart") then
+--		if part.Anchored == false then
+--			part:SetNetworkOwner(nil)
+--		end
+--	end
+--end
+
+WalkSound:Play()
+
+local function Charge()
+	local Trail = Instance.new("Trail")
+	local Att1 = Instance.new("Attachment")
+	local Att2 = Instance.new("Attachment")
+
+	Trail.Parent = Boss.UpperTorso
+	Att1.Parent = Boss.UpperTorso
+	Att2.Parent =Boss.UpperTorso
+
+	Att1.Position = Vector3.new(0,3,0)
+	Att2.Position = Vector3.new(0,-3,0)
+
+	Trail.Attachment0 = Att1
+	Trail.Attachment1 = Att2
+
+	Trail.Color = ColorSequence.new({
+		ColorSequenceKeypoint.new(0, Color3.new(0, 0, 0)),
+		ColorSequenceKeypoint.new(1, Color3.new(0, 0, 0)),
+	})
+
+	Trail.WidthScale = NumberSequence.new{
+		NumberSequenceKeypoint.new(0, 1);
+		NumberSequenceKeypoint.new(1, 0);
+	}
+	local Animator = Humanoid.Animator
+
+	ChargeAnim:Play(0.1,1,3)
+
+	local OnAttack = true
+	task.spawn(function()
+		local Attacked = {}
+
+		local Velocity = Instance.new("LinearVelocity")
+		local Attachment0 = Instance.new("Attachment") Attachment0.Parent = Boss.HumanoidRootPart
+
+		Velocity.Attachment0 = Attachment0
+		Velocity.Parent = Boss.HumanoidRootPart
+		Velocity.VectorVelocity = HRP.CFrame.LookVector * 50
+		Velocity.RelativeTo = Enum.ActuatorRelativeTo.World
+		Velocity.MaxForce = math.huge
+		task.spawn(function()
+			SoundFol.RushScream:Play()
+			ChargeAnim.Stopped:Wait()
+			Velocity:Destroy()
+			Attachment0:Destroy()
+		end)
+
+		task.spawn(function()
+			while OnAttack == true do					
+				local HitBox = Instance.new("Part")
+				HitBox.Shape = Enum.PartType.Ball
+				HitBox.Parent = workspace
+				HitBox.Anchored = true
+				HitBox.CanCollide = false
+				HitBox.Size = Vector3.new(5,5,5)
+				HitBox.Transparency = 1
+				HitBox.Position = HRP.Position
+				print("돌진반복", OnAttack)
+				local result = workspace:GetPartsInPart(HitBox)
+				--print(result)
+
+				if result then
+					for i, parts in pairs(result) do
+						local Targetchr = parts.Parent -- 돌진 히트박스 방식 최적화 먼저 계산
+						if game.Players:GetPlayerFromCharacter(Targetchr) then
+							OnAttack = false
+							Targetchr.Humanoid.Health = Targetchr.Humanoid.Health - 30
+							break
+						end
+					end
+				end
+
+				HitBox:Destroy()
+
+				RunService.Heartbeat:Wait()
+
+			end
+		end)
+
+
+		ChargeAnim.Stopped:Wait()
+		Trail:Destroy()
+		Att1:Destroy()
+		Att2:Destroy()
+		print("돌진끝")
+		OnAttack = false -- OnAttack이 계속 true라서 반복됨, 이유 불명
+	end)
+end
+
+local function Awaken()
+	Humanoid.WalkSpeed += 3
+	Awakened = true
+	script.Parent.HitPart.ProximityPrompt.Value.Value = 4
+
+	task.spawn(function()
+		local previousvolume = workspace.SoundFolder.RealBossFight.Volume
+		TweenService:Create(workspace.SoundFolder.RealBossFight, TweenInfo.new(1), {Volume = 0}):Play()
+		task.wait(2)
+		workspace.SoundFolder.RealBossFight:Stop()
+		workspace.SoundFolder.RealBossFight.Volume = previousvolume
+	end)
+	WalkAnim:Stop()
+
+	AwakenAnim:Play()
+	task.wait(2)
+	SoundFol.PhaseTwoScream:Play()
+	AwakenAnim.Stopped:Wait()
+	workspace.SoundFolder.BossFightTwoPhase:Play()
+	WalkAnim:Play()
+
+	HRP.GakSeongParticle.Enabled = true
+	TweenService:Create(Boss.Highlight, TweenInfo.new(1), {OutlineTransparency = 0}):Play()
+end
+
+local function Skill1()
+	SkillAnim1:Play()
+	SkillAnim1:AdjustSpeed(Awakened and 2 or 1.5)
+	SkillAnim1:GetMarkerReachedSignal("Attack"):Wait()
+	game.ReplicatedStorage.Ai_Boss.ShakingRumble:FireAllClients(4)
+
+	
+	local ShockWave = game.ReplicatedStorage.Ai_Boss.ShockWave:Clone()
+	SoundFol.GroundHitSound:Play()
+	ShockWave.Parent = workspace
+
+	if Awakened == true then
+		ShockWave.BrickColor = BrickColor.new("Really red")
+	end
+	ShockWave.Position = Vector3.new(Boss.LeftHand.Position.X, Boss.LeftHand.Position.Y, Boss.LeftHand.Position.Z) 
+	ShockWave.Transparency = 0
+	local tw = TweenService:Create(ShockWave, TweenInfo.new(Awakened and 1 or 1.2, Enum.EasingStyle.Sine, Enum.EasingDirection.In), {Transparency = 1, Size = Vector3.new(60, 60, 60)}) tw:Play() -- 이거 속도 5분의 1된거 계산해서 잘 바꿔두기
+
+	local func
+	func = ShockWave.Touched:Connect(function(hit)
+		local Target = hit.Parent
+		if Target:FindFirstChild("Humanoid") then
+			if game.Players:GetPlayerFromCharacter(Target) then
+				Target.Humanoid.Health = Target.Humanoid.Health - (Awakened and 15 or 10)
+				func:Disconnect()
+			end
+		end
+	end)
+
+	task.spawn(function()
+		tw.Completed:Wait()
+		func:Disconnect()
+		ShockWave:Destroy()
+	end)
+end
+
+local function Skill2()
+	SkillAnim2:Play()
+	SkillAnim2:AdjustSpeed(Awakened and 2 or 1.5)
+	SoundFol.SpawnMobSound:Play()
+	SkillAnim2.Stopped:Wait()
+
+	local Jap1 = game.ReplicatedStorage.Ai_Boss.JabMop:Clone()
+	Jap1.Parent = workspace.Enemy
+	Jap1:PivotTo(Boss:GetPivot() * CFrame.new(5,10,0))
+	local Jap2 = game.ReplicatedStorage.Ai_Boss.JabMop:Clone()
+	Jap2.Parent = workspace.Enemy
+	Jap2:PivotTo(Boss:GetPivot() * CFrame.new(-5,10,0))
+end
+
+local function Attack()
+	AttackAnim1:Play()
+	AttackAnim1:AdjustSpeed(Awakened and 2.5 or 2)
+	local connection1 = Boss.LeftHand.Touched:Connect(function(hit)
+		if hit.Parent:FindFirstChild("Humanoid") then
+			hit.Parent.Humanoid.Health -= 20
+		end
+	end)
+	task.spawn(function()
+		task.wait(0.3)
+		SoundFol.Swing:Play()
+	end)
+
+	AttackAnim1.Stopped:Wait()
+	connection1:Disconnect()
+	AttackAnim2:Play()
+	AttackAnim2:AdjustSpeed(Awakened and 3 or 2.5)
+	local connection2 = Boss.LeftHand.Touched:Connect(function(hit)
+		if hit.Parent:FindFirstChild("Humanoid") then
+			hit.Parent.Humanoid.Health -= 20
+		end
+	end)
+	task.spawn(function()
+		task.wait(0.3)
+		SoundFol.Swing:Play()
+	end)
+	AttackAnim2.Stopped:Wait()
+	connection2:Disconnect()
+end
+
+local function ChasePlayer()
+	local filtertable = {}
+	table.insert(filtertable, script.Parent)
+	table.insert(filtertable, workspace.BlackListPart)
+	RayCastParamsForChasePlayer.FilterDescendantsInstances = filtertable
+	for i, plrs in pairs(Players:GetPlayers()) do
+		if plrs.Character then
+			table.insert(filtertable, plrs.Character)
+		end
+	end
+
+	RayCastParams.FilterDescendantsInstances = filtertable
+
+	local PlayersTable = {}
+
+	for i, plr in pairs(Players:GetPlayers()) do
+		if plr.Character then
+			local result = workspace:Raycast(HRP.Position, plr.Character.HumanoidRootPart.Position - HRP.Position, RayCastParamsForChasePlayer)
+			if result then
+				if Players:GetPlayerFromCharacter(result.Instance.Parent) then
+					table.insert(PlayersTable, {plr, (HRP.Position - plr.Character.HumanoidRootPart.Position).Magnitude})
+				end
+			end
+		end
+	end
+
+	local t = {nil, math.huge}
+	if #PlayersTable > 0 then
+		for i, Target in pairs(PlayersTable) do
+			print(t, Target)
+			if Target[2] < t[2] then
+				t[1] = Target[1]
+				t[2] = Target[2]
+			end
+		end
+
+		local plr = t[1]
+		print(plr)
+		while true do
+			if not plr then
+				break
+			end
+			if not plr.Character then
+				break
+			end
+			if Humanoid.Health == 0 then
+				return
+			end
+
+			local aresult = workspace:Raycast(HRP.Position, plr.Character.HumanoidRootPart.Position - HRP.Position, RayCastParams)
+			if (plr.Character.HumanoidRootPart.Position - HRP.Position).Magnitude > 60 and plr.Character.Humanoid.Health == 0 then
+				Finding = true
+				break
+			end
+
+			if aresult then
+				print(aresult.Instance)
+				print("페스파인딩 시작")
+				local path = PathfindingService:CreatePath({
+					AgentRadious = 30
+				})
+				path:ComputeAsync(script.Parent.HumanoidRootPart.Position, plr.Character:GetPivot().Position)
+
+				local WayPoints = path:GetWaypoints()
+				for i, waypoint in pairs(WayPoints) do		
+					local filtertable = {}
+					table.insert(filtertable, script.Parent)
+					table.insert(filtertable, workspace.BlackListPart)
+					RayCastParamsForChasePlayer.FilterDescendantsInstances = filtertable
+					for i, plrs in pairs(Players:GetPlayers()) do
+						if plrs.Character then
+							table.insert(filtertable, plrs.Character)
+						end
+					end
+
+					RayCastParams.FilterDescendantsInstances = filtertable
+					if i == 1 then
+						continue --첫번째 웨이포인트만 스킵, 첫번째 웨이포인트는 길찻기서비스 시작될 시점에는 이미 지나쳤을 가능성 높음. 또는 패스파인딩 시작할 때 자기 위치로 MoveTo함수 쓰는 것도 유효한 방법
+					end
+
+					if not plr then
+						break
+					end
+					if not plr.Character then
+						break
+					end
+					local result = workspace:Raycast(HRP.Position, (plr.Character.HumanoidRootPart.Position - HRP.Position), RayCastParams)
+					print(result)
+					if result == nil then
+						print("패스파인딩 끝")
+						break
+					end
+					--local Part = Instance.new("Part", workspace)
+					--Part.Anchored = true
+					--Part.Size = Vector3.new(0.4,0.4,0.4)
+					--Part.Position = waypoint.Position
+					--Part.CanCollide = false
+					--game:GetService("Debris"):AddItem(Part, 1)
+
+					Humanoid:MoveTo(waypoint.Position)
+					if waypoint.Action == Enum.PathWaypointAction.Jump then
+						Humanoid.Jump = true
+					end
+
+					repeat
+						Humanoid:MoveTo(waypoint.Position)
+						game:GetService("RunService").Heartbeat:Wait() -- 하늘에 떠있을때 페스파인딩 시작해서 그런거구나!
+					until (HRP.Position - waypoint.Position).Magnitude < 6
+				end
+			else
+				if Humanoid.Health/Humanoid.MaxHealth < 0.5 and Awakened == false then
+					WalkSound:Stop()
+					Humanoid:MoveTo(HRP.Position + HRP.CFrame.LookVector * 4)
+					Awaken()
+					WalkSound:Play()
+				end
+				if (plr.Character.HumanoidRootPart.Position - HRP.Position).Magnitude < 5 then
+					WalkSound:Stop()
+					Humanoid:MoveTo(HRP.Position + HRP.CFrame.LookVector * 4)
+					Attack()
+					WalkSound:Play()
+				elseif math.random(1, 50) > 49 then
+					Humanoid:MoveTo(HRP.Position + HRP.CFrame.LookVector * 4)
+					if cooltime <= 0 then
+						cooltime = 4
+						WalkSound:Stop()
+						Humanoid:MoveTo(HRP.Position + HRP.CFrame.LookVector * 4)
+						Skill1()
+						WalkSound:Play()
+					else
+						cooltime -= 1
+					end
+				elseif math.random(1, 101) > 99 then
+					if cooltime2 <= 0 and not workspace:FindFirstChild("JabMop") then
+						WalkSound:Stop()
+						cooltime2 = 10
+						Humanoid:MoveTo(HRP.Position + HRP.CFrame.LookVector * 4)
+						Skill2()
+						WalkSound:Play()
+					else
+						cooltime2 -= 1
+					end
+				elseif math.random(1, 102) > 100 then
+					if cooltime3 <= 0 then
+						cooltime3 = 8
+						WalkSound:Stop()
+						Humanoid:MoveTo(HRP.Position + HRP.CFrame.LookVector * 4)
+						Charge()
+						WalkSound:Play()
+					else
+						cooltime3 -= 1
+					end
+				end
+				Humanoid:MoveTo(plr.Character.HumanoidRootPart.Position)
+			end
+			task.wait()
+		end
+	end
+
+end
+
+Humanoid.Died:Connect(function()
+	workspace.Enemy:ClearAllChildren()
+	WalkAnim:Stop()
+	DeadAnim:Play()
+	SoundFol.PhaseTwoScream:Play()
+	game.Workspace.SoundFolder.BossFightTwoPhase:Stop()
+	game.ReplicatedStorage.BossDead:FireAllClients()
+	game.Workspace.SoundFolder.BossFight:Stop()
+	game.Workspace.SoundFolder.InWindSound:Play()
+	task.wait(2)
+	for i, v in pairs(Boss:GetDescendants()) do
+		if v:IsA("BasePart") or v:IsA("MeshPart") then
+			TweenService:Create(v, TweenInfo.new(0.7), {Transparency = 1}):Play()
+		elseif v:IsA("Decal") then
+			TweenService:Create(v, TweenInfo.new(0.7), {Transparency = 1}):Play()
+		elseif v:IsA("Highlight") then
+			TweenService:Create(v, TweenInfo.new(0.7), {OutlineTransparency = 1}):Play()
+		end
+	end
+	task.wait(0.8)
+	Boss:Destroy()
+end)
+
+while task.wait(0.2) do
+	if Humanoid.Health == 0 then
+		warn("더 이상 보스 개체를 찾을 수 없습니다.")
+		WalkSound:Stop()
+		task.wait(3)
+		WalkSound:Stop()
+		task.wait(0.5)
+		return
+	end
+	ChasePlayer()
+end
