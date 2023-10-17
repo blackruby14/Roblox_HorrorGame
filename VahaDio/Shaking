@@ -1,0 +1,21 @@
+local footsteps = script.Parent.UpperTorso.Footstep
+local RS = game.ReplicatedStorage.Ai_Boss-- 여기!
+
+footsteps.DidLoop:connect(function()
+	for i, v in pairs(game.Players:GetPlayers()) do
+		if v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
+			if v.Character.Humanoid.Health > 0 then
+				local mag = (v.Character.HumanoidRootPart.Position - script.Parent.HumanoidRootPart.Position).magnitude
+				if mag < 20 then
+					RS.ShakingRumble:FireClient(v,3)
+				elseif mag < 40 then
+					RS.ShakingRumble:FireClient(v,2)
+				elseif mag < 60 then
+					RS.ShakingRumble:FireClient(v,1)
+				elseif mag < 80 then
+					RS.ShakingRumble:FireClient(v,0.5)
+				end	
+			end
+		end
+	end
+	end)
