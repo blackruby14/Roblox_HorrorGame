@@ -1,0 +1,51 @@
+local Dialouge = script.Parent.Dialog.DialogText
+local Text = script.Parent.Dialog.DialogText
+local Camera = workspace.CurrentCamera
+local player = game.Players.LocalPlayer
+local Views = workspace:WaitForChild("VilagerCam")
+local tweenService = game:GetService("TweenService")
+function tweenCamera(pos,tweenTime)
+	tweenService:Create(Camera,TweenInfo.new(0.75,Enum.EasingStyle.Cubic), {CFrame = pos.CFrame}):Play()
+end
+
+local FovCutscene = tweenService:Create(Camera, TweenInfo.new(0.75), {FieldOfView = 50})
+
+local FovCutsceneRedo = tweenService:Create(Camera, TweenInfo.new(0.75), {FieldOfView = 70})
+
+local function typing(Dialouge, text)
+	for i = 1,#text do
+		Dialouge.Text = string.sub(text,1,i)
+		wait(0.025)
+	end
+end
+
+ProximityPrompt.Triggered:Connect(function()
+	ProximityPrompt.Enabled = false
+	repeat wait()
+		Camera.CameraType = Enum.CameraType.Scriptable
+	until Camera.CameraType == Enum.CameraType.Scriptable
+	Camera.CFrame = Views.Cam1.CFrame
+	tweenCamera(Views.Cam2, 2)
+	FovCutscene:Play()
+	Border1.BackgroundTransparency = 0
+	Border2.BackgroundTransparency = 0
+	Text.TextTransparency = 0
+	typing(Dialouge, "아 방문객이시군요...", 3, true, 0.05)
+	wait(2)
+	typing(Dialouge, "보시다시피 이 마을에 주민은 저 하나에요...", 3, true, 0.005)
+	wait(2)
+	typing(Dialouge, "사람들이 다 어디갔는지 모르겠는데, 하나 짚이는게 있어요.", 3, true, 0.005)
+	wait(2)
+	typing(Dialouge, "오른쪽 언덕을 따라 쭉 올라가보면 버려진 집이 하나 있을꺼에요..", 3, true, 0.005)
+	wait(2)
+	typing(Dialouge, "제 친구들도 저기에 갔다가 사라진거라서 저는 못가고있어요...", 3, true, 0.005)
+	wait(2)
+	typing(Dialouge, "혹시 저기 무언가 있는지 확인 해 주실 수 있나요..?", 3, true, 0.005)
+	wait(2)
+	FovCutsceneRedo:Play()
+	Border1.BackgroundTransparency = 1
+	Border2.BackgroundTransparency = 1
+	Text.TextTransparency = 1
+	ProximityPrompt.Enabled = true
+	workspace.CurrentCamera.CameraType = Enum.CameraType.Custom
+end)
