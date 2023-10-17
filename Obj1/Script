@@ -1,0 +1,9 @@
+script.Parent.Touched:Connect(function(hit)
+	hit.Parent:FindFirstChild("Humanoid")
+	script.Parent.CanTouch = false
+	game.Workspace.Spawns.Spawn9.Neutral = false
+	game.Workspace.Spawns.Spawn10.Neutral = true
+	game.ReplicatedStorage.TextFolders.obj1:FireAllClients(hit)
+end)
+
+이 스크립트는 이 파트에 닿았을때 목표가 뜨면서 스폰포인트 위치를 바꿔주는 스크립트 입니다.
