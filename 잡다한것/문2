@@ -1,0 +1,37 @@
+local TweenService = game:GetService("TweenService")
+
+local model = script.Parent
+local leftDoor = model.LeftDoor
+local rightDoor = model.RightDoor
+local prompt = model.Top.Attachment.ProximityPrompt
+
+local tweenInfo = TweenInfo.new(1)
+
+local leftGoalOpen = {}
+local leftGoalClose = {}
+leftGoalOpen.CFrame = leftDoor.CFrame * CFrame.new(leftDoor.Size.X, 0, 0)
+leftGoalClose.CFrame = leftDoor.CFrame
+local leftTweenOpen = TweenService:Create(leftDoor, tweenInfo, leftGoalOpen)
+local leftTweenClose = TweenService:Create(leftDoor, tweenInfo, leftGoalClose)
+
+
+local rightGoalOpen = {}
+local rightGoalClose = {}
+rightGoalOpen.CFrame = rightDoor.CFrame * CFrame.new(-rightDoor.Size.X, 0, 0)
+rightGoalClose.CFrame = rightDoor.CFrame
+local rightTweenOpen = TweenService:Create(rightDoor, tweenInfo, rightGoalOpen)
+local rightTweenClose = TweenService:Create(rightDoor, tweenInfo, rightGoalClose)
+
+prompt.Triggered:Connect(function(player)
+	if prompt.ActionText == "닫기" then
+		leftTweenClose:Play()
+		rightTweenClose:Play()
+		script.Parent.Sound2:Play()
+		prompt.ActionText = "열기"
+	else
+		leftTweenOpen:Play()
+		rightTweenOpen:Play()
+		script.Parent.Sound:Play()
+		prompt.ActionText = "닫기"
+	end
+end)
