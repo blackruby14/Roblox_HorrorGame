@@ -1,0 +1,26 @@
+local lastPosition
+local root = script.Parent.HumanoidRootPart
+local originPos = root.CFrame
+
+spawn(function()
+	while root.Parent do
+		lastPosition = root.Position
+		wait(1)
+		if (lastPosition - root.Position).magnitude < 1 then 
+			print("괴물이 움직이지 못하는 중.")
+			local Randon = math.random(1,3)
+			root.CFrame = originPos
+			script.Parent.Teleport:Fire()
+			wait(5)
+			if Random == 1 then
+				script.Parent.HumanoidRootPart.Position = game.Workspace.LoopPoints.Part1
+			end
+			if Random == 2 then
+				script.Parent.HumanoidRootPart.Position = game.Workspace.LoopPoints.Part6
+			end
+			if Random == 3 then
+				script.Parent.HumanoidRootPart.Position = game.Workspace.LoopPoints.Part3
+			end
+		end
+	end
+end)
