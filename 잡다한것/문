@@ -1,0 +1,28 @@
+local Hinge = script.Parent.PrimaryPart
+local opened = false
+
+local Promt = script.Parent:WaitForChild("ProximityPrompt")
+
+function OpenDoor()
+	if opened == false then
+		opened = true
+		script.Parent.ProximityPrompt.ActionText = "닫기"
+		script.Parent.door_open:Play()
+		for i = 1, 21 do
+			script.Parent:SetPrimaryPartCFrame(Hinge.CFrame*CFrame.Angles(0, math.rad(5), 0))
+			wait()
+		end
+	else
+		opened = false
+		script.Parent.ProximityPrompt.ActionText = "열기"
+		script.Parent.door_close:Play()
+		for i = 1, 21 do
+			script.Parent:SetPrimaryPartCFrame(Hinge.CFrame*CFrame.Angles(0, math.rad(-5), 0))
+			wait()
+		end
+	end
+end
+Promt.Triggered:Connect(function(Players)
+	OpenDoor()
+end)
+s
