@@ -1,0 +1,88 @@
+local Black = script.Parent.Parent.Black
+------------------------------------
+local TS = game:GetService("TweenService")
+local Camera = game.Workspace.CurrentCamera
+local F = game.Workspace.Cutscene.Scene1
+local FallVaHaDio = game.Workspace.FallVaHadio
+local Screen1 = F.P1
+local Screen2 = F.P2
+local Screen3 = F.P3
+local Screen4 = F.P4
+local Screen5 = F.P5
+local Screen6 = F.P6
+-----------------------------
+local function AnimateText(Text)
+	for i = 1, #Text, 1 do
+		script.Parent.Parent.RedTextLabel.Text = string.sub(Text, 1, i)
+		wait(0.04)
+	end
+end
+
+local CamShake = script.CamShake:Clone()
+
+game.ReplicatedStorage.Teleport1.OnClientEvent:Connect(function()
+	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 0
+	TS:Create(Black,TweenInfo.new(2),{BackgroundTransparency = 0}):Play()
+	task.wait(2)
+	game.Workspace.SoundFolder.BossFight:Play()
+	Camera.CameraType = Enum.CameraType.Scriptable
+	Camera.CFrame = Screen1.CFrame
+	script.Parent.Parent.One.Visible = true
+	script.Parent.Parent.Two.Visible = true
+	TS:Create(Black,TweenInfo.new(2),{BackgroundTransparency = 1}):Play()
+	TS:Create(Camera, TweenInfo.new(8), {CFrame = Screen2.CFrame}):Play()
+	task.wait(2)
+	script.Parent.Parent.RedTextLabel.Visible = true
+	script.Parent.Parent.RedTextLabel.TextTransparency = 0
+	AnimateText("네 발로 직접 찾아왔구나..")
+	task.wait(2.5)
+	AnimateText("내가 준비한 선물들은 어땠어?")
+	task.wait(2)
+	TS:Create(script.Parent.Parent.RedTextLabel,TweenInfo.new(0.5),{TextTransparency = 1}):Play()
+	Camera.CFrame = Screen3.CFrame
+	task.wait(2)
+	script.Parent.Parent.RedTextLabel.TextTransparency = 0
+	AnimateText("그 때의 고통을..")
+	task.wait(2)
+	AnimateText("이번..이번에야 말로 내가 겪은걸 똑같이 느끼게 해주마")
+	task.wait(2)
+	TS:Create(script.Parent.Parent.RedTextLabel,TweenInfo.new(0.5),{TextTransparency = 1}):Play()
+	Camera.CFrame = Screen4.CFrame
+	task.wait(0.5)
+	game.ReplicatedStorage.VaHadioFall:FireServer()
+	task.wait(1)
+	game.Workspace.SoundFolder.GroundHitSound:Play()
+	CamShake.Parent = game.Players.LocalPlayer.Character
+	CamShake.Disabled = false
+	task.wait(1)
+	CamShake:Destroy()
+	task.wait(1)
+	Camera.CFrame = Screen5.CFrame
+	TS:Create(Camera, TweenInfo.new(6), {CFrame = Screen6.CFrame}):Play()
+	game.Workspace.SoundFolder.PhaseTwoScream:Play()
+	script.Parent.Parent.RedTextLabel.TextTransparency = 0
+	AnimateText("내 작품으로 똑똑히 보여주겠어.")
+	task.wait(2)
+	TS:Create(script.Parent.Parent.RedTextLabel,TweenInfo.new(0.5),{TextTransparency = 1}):Play()
+	TS:Create(Black,TweenInfo.new(2),{BackgroundTransparency = 0}):Play()
+	TS:Create(game.Workspace.SoundFolder.BossFight,TweenInfo.new(2),{Volume = 0}):Play()
+	task.wait(2)
+	game.Workspace.SoundFolder.BossFight:Stop()
+	task.wait(1)
+	script.Parent.Parent.Object2.Visible = true
+	game.Workspace.SoundFolder.Thud:Play()
+	task.wait(1.5)
+	script.Parent.Parent.Mission2.Visible = true
+	game.Workspace.SoundFolder.Thud:Play()
+	Camera.CameraType = Enum.CameraType.Custom
+	Camera.CameraSubject = game.Players.LocalPlayer.Character:WaitForChild("Humanoid")
+	script.Parent.Parent.One.Visible = false
+	script.Parent.Parent.Two.Visible = false
+	task.wait(2)
+	TS:Create(script.Parent.Parent.Object2,TweenInfo.new(2),{TextTransparency = 1}):Play()
+	TS:Create(script.Parent.Parent.Mission2,TweenInfo.new(2),{TextTransparency = 1}):Play()
+	TS:Create(Black,TweenInfo.new(2),{BackgroundTransparency = 1}):Play()
+	game.Players.LocalPlayer.Character:PivotTo(workspace.Teleport1.CFrame)
+	game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 10
+	game.ReplicatedStorage.SpawnBoss:FireServer()
+end)
