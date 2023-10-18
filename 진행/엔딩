@@ -1,0 +1,114 @@
+local White = script.Parent.Parent.White
+local Black = script.Parent.Parent.Black
+local Logo = script.Parent.Parent.Logo
+local plr = game.Players:FindFirstChildOfClass("Player")
+
+function Show()
+	for i=1,100 do
+		White.BackgroundTransparency = White.BackgroundTransparency - 0.01
+		wait(0.03)
+	end
+end
+
+function Hide()
+	for i=1,100 do
+		Black.BackgroundTransparency = Black.BackgroundTransparency + 0.01
+		Logo.ImageTransparency = Logo.ImageTransparency + 0.1
+		wait(0.025)
+	end
+end
+
+-------------------------------------
+
+local TweenService = game:GetService("TweenService")
+local Camera = game.Workspace.CurrentCamera
+local F = game.Workspace.Cutscene.Ending
+
+local Screen1 = F.P1
+local Screen2 = F.P2
+local Screen3 = F.P3
+local Screen4 = F.P4
+
+local function MoveCamera(one, two, three, four, Time, EasingStyle, Easing)
+	Camera.CameraType = Enum.CameraType.Scriptable
+	Camera.CFrame = one.CFrame
+	local Cutscene = TweenService:Create(Camera, TweenInfo.new(999999, EasingStyle, Easing), {CFrame = two.CFrame})
+	local Cutscene2 = TweenService:Create(Camera, TweenInfo.new(0, EasingStyle, Easing), {CFrame = three.CFrame})
+	local Cutscene3 = TweenService:Create(Camera, TweenInfo.new(9999999, EasingStyle, Easing), {CFrame = four.CFrame})
+	local Cutscene4 = TweenService:Create(Camera, TweenInfo.new(9999999, EasingStyle, Easing), {CFrame = four.CFrame})
+	Cutscene:Play()
+	wait(Time)
+	Cutscene2:Play()
+	wait(Time)
+	Cutscene3:Play()
+	wait(Time)
+	Cutscene4:Play()
+	wait(Time)
+end
+
+local function Cutscene()
+	MoveCamera(Screen1, Screen2, Screen3, Screen4, 2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out)
+
+end
+
+-----------------------------
+
+game.ReplicatedStorage.End.OnClientEvent:Connect(function()
+	game.Workspace.SoundFolder.KyungBo:Play()
+	game.Workspace.SoundFolder.ElvSound:Play()
+	wait(1)
+	game.Workspace.SoundFolder.PortalSound:Play()
+	game.Workspace.SoundFolder.InWindSound:Stop()
+	White.Visible = true
+	White.BackgroundTransparency = 1
+	Show(wait())
+	wait(2)
+	Black.Visible = true
+	Black.BackgroundTransparency = 0 
+	Logo.Visible = true
+	local Blur = Instance.new("BlurEffect")
+	Blur.Parent = game.Lighting
+	Blur.Size = 15
+	game.Lighting.ClockTime = 10
+	game.Players.LocalPlayer.Character:FindFirstChild("CamShake"):Destroy()
+	game.ReplicatedStorage.GameFolder.Day.Parent = game.Lighting
+	script.Parent.Parent.Parent.HealthAndStamina.Enabled = false
+	game.Workspace.SoundFolder.KyungBo:Stop()
+	game.Workspace.SoundFolder.LoudThud:Play()
+	script.Parent.Parent.Credit.Text = "End of Chapter 1"
+	script.Parent.Parent.Credit.subtitle.Text = "챕터 2에서 이어집니다!"
+	script.Parent.Parent.Credit.Visible = true
+	White.Visible = false
+	wait(1)
+	game.ReplicatedStorage.EndCity.Parent = game.Workspace
+	Cutscene()
+	game.Workspace.SoundFolder.EndingBGM:Play()
+	Hide(wait())
+	wait(5)
+	script.Parent.Parent.Credit.Text = "게임 기획 / 스토리 기획"
+	script.Parent.Parent.Credit.subtitle.Text = "Chrn_E"
+	wait(5)
+	script.Parent.Parent.Credit.Text = "맵 제작"
+	script.Parent.Parent.Credit.subtitle.Text = "Chrn_E, lmbqqr"
+	wait(5)
+	script.Parent.Parent.Credit.Text = "스크립트 제작"
+	script.Parent.Parent.Credit.subtitle.Text = "Chrn_E, lmbqqr"
+	wait(5)
+	script.Parent.Parent.Credit.Text = "Ai 제작"
+	script.Parent.Parent.Credit.subtitle.Text = "MaronDev"
+	wait(5)
+	script.Parent.Parent.Credit.Text = "BGM 제작"
+	script.Parent.Parent.Credit.subtitle.Text = "Chrn_E, Roblox"
+	wait(5)
+	script.Parent.Parent.Credit.Text = "효과음 제작"
+	script.Parent.Parent.Credit.subtitle.Text = "Chrn_E, Roblox"
+	wait(5)
+	script.Parent.Parent.Credit.Text = "괴물 제작"
+	script.Parent.Parent.Credit.subtitle.Text = "Chrn_E"
+	wait(5)
+	script.Parent.Parent.Credit.Text = "특별히 감사한 분"
+	script.Parent.Parent.Credit.subtitle.Text = plr.Name
+	wait(7)
+	script.Parent.Parent.Credit.Text = "End Of Chapter 1"
+	script.Parent.Parent.Credit.subtitle.Text = "플레이 해주셔서 감사합니다!"
+end)
