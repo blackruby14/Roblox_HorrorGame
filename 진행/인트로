@@ -1,0 +1,62 @@
+game.ReplicatedFirst:RemoveDefaultLoadingScreen()
+
+local PlrG = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+local Gui = script.Load:Clone()
+Gui.Parent = PlrG
+
+local T = Gui.Announce.TextLabel
+local F = Gui.Announce
+local L = Gui.Announce.Logo
+
+function S()
+	for i=1, 10 do
+		T.TextTransparency = T.TextTransparency - 0.1
+		wait(0.05)
+	end
+end
+
+function H()
+	for i=1, 10 do
+		T.TextTransparency = T.TextTransparency + 0.1
+		wait(0.05)
+	end
+end
+
+repeat wait(5) until game:IsLoaded()
+
+Gui.Announce.LoadText.Visible = false
+
+wait(2)
+
+T.Text = "노페어 게임대회 헤비급 / 2022 샌드박스 공모전 수상작"
+S()
+Gui.Announce.Click.Disabled = false
+Gui.Announce.Space.Disabled = false
+wait(3)
+H()
+wait(2)
+T.Text = "이 게임은 이름이 '공포체험'이듯 뻔한 클리셰들을 가지고있습니다."
+S()
+wait(3)
+H()
+wait(2)
+T.Text = "그래픽 품질을 높이고 헤드셋을 착용하면 게임 품질을 높일 수 있습니다."
+S()
+wait(3)
+H()
+wait(2)
+L.Visible = true
+script.Load.Announce.Click:Destroy()
+script.Load.Announce.Space:Destroy()
+script.Load.Announce.Skip.Visible = false
+game.Workspace.SoundFolder.LoudThud:Play()
+wait(3)
+Gui.Announce.Skip.Visible = false
+for i=1, 10 do
+	L.ImageTransparency = L.ImageTransparency + 0.1
+	F.BackgroundTransparency = F.BackgroundTransparency + 0.1
+	Gui.Announce.Skip.TextTransparency = Gui.Announce.Skip.TextTransparency + 0.1
+	wait(0.05)
+end
+game.Workspace.StartBarrier:Destroy()
+script.Load:Destroy()
