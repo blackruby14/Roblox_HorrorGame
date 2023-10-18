@@ -1,0 +1,77 @@
+--스페이스바로 스킵
+
+local CanSkip = false
+local Key = Enum.KeyCode.Space
+UserInputService = game:GetService("UserInputService")
+
+local T = script.Parent.TextLabel
+local F = script.Parent
+local L = script.Parent.Logo
+
+function H()
+	for i=1, 10 do
+		T.TextTransparency = T.TextTransparency + 0.1
+		L.ImageTransparency = L.ImageTransparency + 0.1
+		F.BackgroundTransparency = F.BackgroundTransparency + 0.1
+		script.Parent.Skip.TextTransparency = script.Parent.Skip.TextTransparency + 0.1
+		wait(0.05)
+	end
+end
+
+function WithSkip()
+	CanSkip = true
+	for i=1, 10 do
+		script.Parent.Skip.TextTransparency = script.Parent.Skip.TextTransparency - 0.1
+		wait(0.05)
+	end
+end
+WithSkip()
+
+UserInputService.InputBegan:connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Keyboard then
+		if input.KeyCode == Key and CanSkip == true then
+			game.Workspace.StartBarrier:Destroy()
+			script.Parent.Skip.Visible = false
+			CanSkip = false
+			H()
+			game.Workspace.StartBarrier:Destroy()
+			script.Parent.Parent:Destroy()
+		end
+	end
+end)
+
+--클릭하여 스킵
+
+local CanSkip = false
+local T = script.Parent.TextLabel
+local F = script.Parent
+local L = script.Parent.Logo
+
+function H()
+	for i=1, 10 do
+		T.TextTransparency = T.TextTransparency + 0.1
+		L.ImageTransparency = L.ImageTransparency + 0.1
+		F.BackgroundTransparency = F.BackgroundTransparency + 0.1
+		script.Parent.Skip.TextTransparency = script.Parent.Skip.TextTransparency + 0.1
+		wait(0.05)
+	end
+end
+
+function WithSkip()
+	CanSkip = true
+	for i=1, 10 do
+		script.Parent.Skip.TextTransparency = script.Parent.Skip.TextTransparency - 0.1
+		wait(0.05)
+	end
+end
+
+WithSkip()
+
+script.Parent.Skip.MouseButton1Click:Connect(function()
+	script.Parent.Skip.Visible = false
+	game.Workspace.StartBarrier:Destroy()
+	H()
+	game.Workspace.StartBarrier:Destroy()
+	script.Parent.Parent:Destroy()
+end)
+
