@@ -1,0 +1,11 @@
+script.Parent.Touched:Connect(function(plr)
+	if plr.Parent:FindFirstChild("Humanoid") then
+		script.Parent.CanTouch = false
+		script.Parent.Parent.ScareJS.LightOpint.SpotLight.Enabled = true
+		script.Parent.Parent.GhostIsCome.CanTouch = true
+		wait(0.1)
+		game.Workspace.SoundFolder.LoudJumpscare:Play()
+		wait(4)
+		script.Parent.Parent.ScareJS:Destroy()
+	end
+end)
